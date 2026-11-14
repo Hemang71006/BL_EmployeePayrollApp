@@ -1,60 +1,59 @@
 
 package com.example.employeepayrollapp.controller;
 
+import com.example.employeepayrollapp.dto.EmployeeDTO;
+import com.example.employeepayrollapp.model.EmployeePayrollData;
 import org.springframework.web.bind.annotation.*;
 
 /*
  * Author: Hemang
  * Date: 13-11-2026
  *
- * UC1: REST Controller
- * This controller handles HTTP requests related to Employee Payroll.
+ * UC3: REST Controller with DTO and Model
+ * This controller handles employee payroll requests.
  */
 
 @RestController
 @RequestMapping("/employeepayrollservice")
 public class EmployeePayrollController {
 
-    /*
-     * GET API
-     * Returns a success message when the endpoint is accessed.
-     */
+    // GET API
     @GetMapping("/")
     public String getEmployees() {
         return "GET Request Successful";
     }
 
-    /*
-     * GET API with Path Variable
-     * Reads the employee ID from the URL.
-     */
+    // GET API with Path Variable
     @GetMapping("/get/{id}")
     public String getEmployee(@PathVariable int id) {
         return "GET Employee with ID: " + id;
     }
 
-    /*
-     * POST API
-     * Accepts employee information in the request body.
-     */
+    // POST API: Accepts EmployeeDTO and returns EmployeePayrollData
     @PostMapping("/create")
-    public String createEmployee(@RequestBody String employee) {
-        return "POST Request Successful: " + employee;
+    public EmployeePayrollData createEmployee(@RequestBody EmployeeDTO employeeDTO) {
+
+        EmployeePayrollData employee = new EmployeePayrollData(
+                employeeDTO.getName(),
+                employeeDTO.getSalary()
+        );
+
+        return employee;
     }
 
-    /*
-     * PUT API
-     * Accepts employee information for an update request.
-     */
+    // PUT API: Accepts EmployeeDTO and returns EmployeePayrollData
     @PutMapping("/update")
-    public String updateEmployee(@RequestBody String employee) {
-        return "PUT Request Successful: " + employee;
+    public EmployeePayrollData updateEmployee(@RequestBody EmployeeDTO employeeDTO) {
+
+        EmployeePayrollData employee = new EmployeePayrollData(
+                employeeDTO.getName(),
+                employeeDTO.getSalary()
+        );
+
+        return employee;
     }
 
-    /*
-     * DELETE API
-     * Reads the employee ID from the URL.
-     */
+    // DELETE API
     @DeleteMapping("/delete/{id}")
     public String deleteEmployee(@PathVariable int id) {
         return "DELETE Request Successful: " + id;
