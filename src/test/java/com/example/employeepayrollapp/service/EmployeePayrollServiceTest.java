@@ -1,14 +1,17 @@
-
 package com.example.employeepayrollapp.service;
 
-// Import DTO for creating test employee details
+// Import DTO for employee test data
 import com.example.employeepayrollapp.dto.EmployeeDTO;
 
-// Import model to verify returned employee objects
+// Import model for checking employee results
 import com.example.employeepayrollapp.model.EmployeePayrollData;
 
-// Import JUnit Test annotation
+// Import JUnit annotations
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+// Import collection
+import java.util.List;
 
 // Import assertion methods
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,55 +20,135 @@ import static org.junit.jupiter.api.Assertions.*;
  * Author: Hemang
  * Date: 13-11-2026
  *
- * UC4: Employee Payroll Service Tests
- * Tests employee creation and update service methods.
+ * UC5: Employee Payroll Service Tests
+ * Tests employee creation, retrieval, updating and deletion.
  */
 
 class EmployeePayrollServiceTest {
 
-    // Create the service object to test its methods directly
-    private final EmployeePayrollService employeePayrollService =
-            new EmployeePayrollService();
+    // Service instance used for testing
+    private EmployeePayrollService employeePayrollService;
 
-    // Test whether the createEmployee method returns correct employee details
+    // Initialize a fresh service before every test
+    @BeforeEach
+    void setUp() {
+
+        // Create a new service with an empty employee list
+        employeePayrollService = new EmployeePayrollService();
+    }
+
+    // Test employee creation
     @Test
-    void givenEmployeeDTO_whenCreateEmployee_thenReturnEmployee() {
+    void givenEmployeeDTO_whenCreateEmployee_thenEmployeeShouldBeStored() {
 
-        // Create DTO containing sample employee information
+        // Create sample employee details
         EmployeeDTO employeeDTO = new EmployeeDTO("Hemang", 50000);
 
-        // Call the service method to create an employee
+        // Create and store the employee
         EmployeePayrollData employee =
                 employeePayrollService.createEmployee(employeeDTO);
 
-        // Verify that the returned employee object is not null
+        // Verify that the employee was created
         assertNotNull(employee);
 
-        // Verify that the employee name is correct
-        assertEquals("Hemang", employee.getName());
+        // Verify that the first employee receives ID 1
+        assertEquals(1, employee.getId());
 
-        // Verify that the employee salary is correct
+        // Verify employee details
+        assertEquals("Hemang", employee.getName());
+        assertEquals(50000, employee.getSalary());
+
+        // Verify that the employee is stored in the list
+        assertEquals(1, employeePayrollService.getAllEmployees().size());
+    }
+
+    // Test retrieving all employees
+    @Test
+    void givenMultipleEmployees_whenGetAllEmployees_thenReturnEmployeeList() {
+
+        // Create two employees
+        employeePayrollService.createEmployee(new EmployeeDTO("Hemang", 50000));
+        employeePayrollService.createEmployee(new EmployeeDTO("Rahul", 60000));
+
+        // Retrieve all employees
+        List<EmployeePayrollData> employees =
+                employeePayrollService.getAllEmployees();
+
+        // Verify that both employees are returned
+        assertEquals(2, employees.size());
+    }
+
+    // Test retrieving an employee by ID
+    @Test
+    void givenEmployeeId_whenGetEmployeeById_thenReturnEmployee() {
+
+        // Store an employee
+        EmployeePayrollData createdEmployee =
+                employeePayrollService.createEmployee(
+                        new EmployeeDTO("Hemang", 50000)
+                );
+
+        // Retrieve the employee using its ID
+        EmployeePayrollData employee =
+                employeePayrollService.getEmployeeById(createdEmployee.getId());
+
+        // Verify the retrieved employee
+        assertEquals("Hemang", employee.getName());
         assertEquals(50000, employee.getSalary());
     }
 
-    // Test whether the updateEmployee method returns correct employee details
+    // Test updating an employee
     @Test
-    void givenEmployeeDTO_whenUpdateEmployee_thenReturnEmployee() {
+    void givenEmployeeIdAndDTO_whenUpdateEmployee_thenUpdateEmployeeDetails() {
 
-        // Create DTO containing updated employee information
-        EmployeeDTO employeeDTO = new EmployeeDTO("Hemang", 60000);
+        // Create an employee
+        EmployeePayrollData createdEmployee =
+                employeePayrollService.createEmployee(
+                        new EmployeeDTO("Hemang", 50000)
+                );
 
-        // Call the service update method
+        // Create updated employee details
+        EmployeeDTO updatedDTO = new EmployeeDTO("Hemang", 70000);
+
+        // Update the employee
+        EmployeePayrollData updatedEmployee =
+                employeePayrollService.updateEmployee(
+                        createdEmployee.getId(), updatedDTO
+                );
+
+        // Verify that the employee details were updated
+        assertEquals("Hemang", updatedEmployee.getName());
+        assertEquals(70000, updatedEmployee.getSalary());
+
+        // Verify that updating did not create an additional employee
+        assertEquals(1, employeePayrollService.getAllEmployees().size());
+    }
+
+    // Test deleting an employee
+    @Test
+    void givenEmployeeId_whenDeleteEmployee_thenRemoveEmployee() {
+
+        // Create an employee
         EmployeePayrollData employee =
-                employeePayrollService.updateEmployee(employeeDTO);
+                employeePayrollService.createEmployee(
+                        new EmployeeDTO("Hemang", 50000)
+                );
 
-        // Verify that the returned employee object is not null
-        assertNotNull(employee);
+        // Delete the employee
+        employeePayrollService.deleteEmployee(employee.getId());
 
-        // Verify that the employee name is correct
-        assertEquals("Hemang", employee.getName());
+        // Verify that the employee list is empty
+        assertTrue(employeePayrollService.getAllEmployees().isEmpty());
+    }
 
-        // Verify that the updated salary is correct
-        assertEquals(60000, employee.getSalary());
+    // Test handling an invalid employee ID
+    @Test
+    void givenInvalidEmployeeId_whenGetEmployeeById_thenThrowException() {
+
+        // Verify that requesting a missing employee throws an exception
+        assertThrows(
+                java.util.NoSuchElementException.class,
+                () -> employeePayrollService.getEmployeeById(999)
+        );
     }
 }
