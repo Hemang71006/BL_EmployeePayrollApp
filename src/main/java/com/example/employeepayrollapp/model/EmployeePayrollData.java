@@ -1,47 +1,67 @@
-
 package com.example.employeepayrollapp.model;
 
 /*
  * Author: Hemang
  * Date: 13-11-2026
  *
- * UC3: Employee Payroll Model
- * This class represents employee payroll information
- * within the application.
+ * UC5: Employee Payroll Model
+ * Represents employee payroll information.
  */
 
 public class EmployeePayrollData {
 
+    // Stores the unique employee ID
+    private int id;
+
+    // Stores the employee name
     private String name;
+
+    // Stores the employee salary
     private double salary;
 
     // Default constructor
     public EmployeePayrollData() {
-
     }
 
-    // Parameterized constructor
+    // Constructor used when creating an employee
+    public EmployeePayrollData(int id, String name, double salary) {
+        this.id = id;
+        this.name = name;
+        this.salary = salary;
+    }
+
+    // Retains the previous constructor for compatibility with existing code
     public EmployeePayrollData(String name, double salary) {
         this.name = name;
         this.salary = salary;
     }
 
-    // Getter for employee name
+    // Returns the employee ID
+    public int getId() {
+        return id;
+    }
+
+    // Updates the employee ID
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    // Returns the employee name
     public String getName() {
         return name;
     }
 
-    // Setter for employee name
+    // Updates the employee name
     public void setName(String name) {
         this.name = name;
     }
 
-    // Getter for employee salary
+    // Returns the employee salary
     public double getSalary() {
         return salary;
     }
 
-    // Setter for employee salary
+    // Updates the employee salary
     public void setSalary(double salary) {
         this.salary = salary;
     }

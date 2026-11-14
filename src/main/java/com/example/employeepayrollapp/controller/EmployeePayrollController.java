@@ -1,4 +1,3 @@
-
 package com.example.employeepayrollapp.controller;
 
 // Import DTO to receive employee details
@@ -13,69 +12,115 @@ import com.example.employeepayrollapp.service.EmployeePayrollService;
 // Import Spring REST annotations
 import org.springframework.web.bind.annotation.*;
 
+// Import HTTP status codes and response handling
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+// Import list for returning multiple employees
+import java.util.List;
+
+// Import exception handling
+import java.util.NoSuchElementException;
+
 /*
  * Author: Hemang
  * Date: 13-11-2026
  *
- * UC4: Employee Payroll Controller
- * This controller handles HTTP requests and delegates
- * employee operations to the service layer.
+ * UC5: Employee Payroll Controller
+ * Handles employee CRUD operations through REST APIs.
  */
 
-// Marks this class as a REST controller
 @RestController
 
-// Defines the common URL for all controller endpoints
+// Defines the common URL for all employee endpoints
 @RequestMapping("/employeepayrollservice")
 public class EmployeePayrollController {
 
-    // Stores the EmployeePayrollService object reference
+    // Stores the service object reference
     private final EmployeePayrollService employeePayrollService;
 
-    // Constructor injection: Spring automatically provides the service object
+    // Constructor injection of the service
     public EmployeePayrollController(EmployeePayrollService employeePayrollService) {
 
-        // Assign the injected service object to the instance variable
+        // Assign the injected service object
         this.employeePayrollService = employeePayrollService;
     }
 
-    // Handles GET requests to retrieve the employee endpoint
+    // Handles GET requests to retrieve all employees
     @GetMapping("/")
-    public String getEmployees() {
+    public List<EmployeePayrollData> getEmployees() {
 
-        // Return a success message
-        return "GET Request Successful";
+        // Return all employees from the service
+        return employeePayrollService.getAllEmployees();
     }
 
-    // Handles GET requests using an employee ID
+    // Handles GET requests to retrieve one employee by ID
     @GetMapping("/get/{id}")
-    public String getEmployee(@PathVariable int id) {
+    public ResponseEntity<?> getEmployee(@PathVariable int id) {
 
-        // Return a message containing the received employee ID
-        return "GET Employee with ID: " + id;
+        try {
+            // Retrieve the employee using the supplied ID
+            return ResponseEntity.ok(employeePayrollService.getEmployeeById(id));
+
+        } catch (NoSuchElementException exception) {
+
+            // Return 404 when the employee does not exist
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(exception.getMessage());
+        }
     }
 
-    // Handles POST requests to create an employee
+    // Handles POST requests to create a new employee
     @PostMapping("/create")
-    public EmployeePayrollData createEmployee(@RequestBody EmployeeDTO employeeDTO) {
+    public ResponseEntity<EmployeePayrollData> createEmployee(
+            @RequestBody EmployeeDTO employeeDTO) {
 
-        // Pass employee details to the service and return its result
-        return employeePayrollService.createEmployee(employeeDTO);
+        // Create and store the employee
+        EmployeePayrollData employee =
+                employeePayrollService.createEmployee(employeeDTO);
+
+        // Return the created employee with HTTP 201 status
+        return ResponseEntity.status(HttpStatus.CREATED).body(employee);
     }
 
-    // Handles PUT requests to update employee details
-    @PutMapping("/update")
-    public EmployeePayrollData updateEmployee(@RequestBody EmployeeDTO employeeDTO) {
+    // Handles PUT requests to update an existing employee
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateEmployee(
+            @PathVariable int id,
+            @RequestBody EmployeeDTO employeeDTO) {
 
-        // Call the service update method and return the result
-        return employeePayrollService.updateEmployee(employeeDTO);
+        try {
+            // Update the employee using the supplied ID
+            EmployeePayrollData employee =
+                    employeePayrollService.updateEmployee(id, employeeDTO);
+
+            // Return the updated employee
+            return ResponseEntity.ok(employee);
+
+        } catch (NoSuchElementException exception) {
+
+            // Return 404 when the employee does not exist
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(exception.getMessage());
+        }
     }
 
-    // Handles DELETE requests using an employee ID
+    // Handles DELETE requests to remove an employee
     @DeleteMapping("/delete/{id}")
-    public String deleteEmployee(@PathVariable int id) {
+    public ResponseEntity<String> deleteEmployee(@PathVariable int id) {
 
-        // Return a success message containing the employee ID
-        return "DELETE Request Successful: " + id;
+        try {
+            // Delete the employee using the supplied ID
+            employeePayrollService.deleteEmployee(id);
+
+            // Return successful deletion response
+            return ResponseEntity.ok("Employee deleted successfully: " + id);
+
+        } catch (NoSuchElementException exception) {
+
+            // Return 404 when the employee does not exist
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(exception.getMessage());
+        }
     }
 }
